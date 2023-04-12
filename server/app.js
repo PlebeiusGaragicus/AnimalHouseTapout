@@ -3,7 +3,7 @@ import path from 'path';
 
 import config from './config.js';
 import { closeApp } from './helpers.js';
-import { db, connectToMongoDB } from "./database.js";
+import { DB_COLLECTION_NAME, db, connectToMongoDB } from "./database.js";
 import { initBot } from './bot.js';
 import { runIntterra } from './intterra.js';
 
@@ -16,6 +16,8 @@ process.on('uncaughtException', (error) => {
     console.error(error);
 });
 
+console.debug("this is debug");
+console.error("this is error");
 
 
 //// SETUP THE EXPRESS APP
@@ -34,14 +36,16 @@ app.listen(PORT, () => {
 
 app.get("/settings", async (req, res) => {
     // TODO: should I just redo this whole function with getters?
-    const collection = db.collection(config.DB_COLLECTION_NAME);
+    const collection = db.collection(DB_COLLECTION_NAME);
 
     const botToken = await collection.findOne({ name: "telegram_bot_token" });
+    const registryPassword = await collection.findOne({ name: "registry_password" });
     const intterraUsername = await collection.findOne({ name: "intterra_username" });
     const intterraPassword = await collection.findOne({ name: "intterra_password" });
 
     res.json({
         botToken: botToken ? botToken.value : "",
+        registryPassword: registryPassword ? registryPassword.value : "",
         intterraUsername: intterraUsername ? intterraUsername.value : "",
         intterraPassword: intterraPassword ? intterraPassword.value : "",
     });
@@ -49,14 +53,18 @@ app.get("/settings", async (req, res) => {
 
 
 app.post('/settings', async (req, res) => {
-    const { botToken, intterraUsername, intterraPassword } = req.body;
+    const { botToken, registryPassword, intterraUsername, intterraPassword } = req.body;
 
     // TODO: should I just redo this whole function with setters?
     try {
-        const collection = db.collection(config.DB_COLLECTION_NAME);
+        const collection = db.collection(DB_COLLECTION_NAME);
 
         await collection.updateOne({ name: 'telegram_bot_token' }, {
             $set: { value: botToken, name: 'telegram_bot_token' }
+        }, { upsert: true });
+
+        await collection.updateOne({ name: 'registry_password' }, {
+            $set: { value: registryPassword, name: 'registry_password' }
         }, { upsert: true });
 
         await collection.updateOne({ name: 'intterra_username' }, {

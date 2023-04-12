@@ -1,10 +1,12 @@
 import { MongoClient } from 'mongodb';
 
-import config from './config.js';
 
+export const DB_COLLECTION_NAME = 'settings'
 
+const DB_DATABASE_NAME = 'AnimalHouseTapout'
+const DB_URI = "mongodb://127.0.0.1:27017/AnimalHouseTapout"
 
-export const client = new MongoClient(config.DB_URI, { useNewUrlParser: true });
+export const client = new MongoClient(DB_URI, { useNewUrlParser: true });
 export let db = null;
 
 
@@ -12,7 +14,7 @@ export let db = null;
 export async function connectToMongoDB() {
     await client.connect();
     console.log("Connected to MongoDB");
-    db = client.db(config.DB_DATABASE_NAME);
+    db = client.db(DB_DATABASE_NAME);
 }
 
 
@@ -35,7 +37,7 @@ export async function closeMongoDBConnection() {
 
 export async function setValue(name, value) {
     try {
-        const collection = db.collection(config.DB_COLLECTION_NAME);
+        const collection = db.collection(DB_COLLECTION_NAME);
         await collection.updateOne({ name: name }, {
             $set: { value: value }
         }, { upsert: true });
@@ -47,7 +49,7 @@ export async function setValue(name, value) {
 
 export async function getValue(name) {
     try {
-        const collection = db.collection(config.DB_COLLECTION_NAME);
+        const collection = db.collection(DB_COLLECTION_NAME);
         const item = await collection.findOne({ name: name });
 
         if (!item)

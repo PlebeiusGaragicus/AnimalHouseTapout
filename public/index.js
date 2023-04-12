@@ -6,6 +6,7 @@ async function fetchSettings() {
     const settings = await response.json();
 
     document.getElementById('botToken').value = settings.botToken || '';
+    document.getElementById('registryPassword').value = settings.registryPassword || '';
     document.getElementById('intterraUsername').value = settings.intterraUsername || '';
     document.getElementById('intterraPassword').value = settings.intterraPassword || '';
 }
@@ -15,13 +16,14 @@ document.getElementById('settingsForm').addEventListener('submit', async (event)
     event.preventDefault();
 
     const botToken = document.getElementById('botToken').value;
+    const registryPassword = document.getElementById('registryPassword').value;
     const intterraUsername = document.getElementById('intterraUsername').value;
     const intterraPassword = document.getElementById('intterraPassword').value;
 
     const response = await fetch('/settings', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ botToken, intterraUsername, intterraPassword }),
+        body: JSON.stringify({ botToken, registryPassword, intterraUsername, intterraPassword }),
     });
 
     if (response.ok) {

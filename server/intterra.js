@@ -80,6 +80,13 @@ export async function runIntterra() {
         return;
     }
 
+    const user_password = await getValue('registry_password');
+    if (!user_password) {
+        console.error("Registry password not set in database");
+        console.log("not running intterra...")
+        return;
+    }
+
     browser = await puppeteer.launch({ headless: config.debug ? false : true });
     const page = await browser.newPage();
 

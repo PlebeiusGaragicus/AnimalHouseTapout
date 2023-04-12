@@ -40,10 +40,12 @@ async function handleText(ctx) {
         console.log("FROM UNKNOWN USER: ", ctx.from.username, " - ", ctx.from.id);
         console.log("PASSWORD: ", ctx.message.text);
 
-        console.log("Correct password: ", config.password);
+        const correct_password = await getValue("registry_password")
+
+        console.log("Correct password: ", correct_password);
 
         // Check the entered password against your predefined password
-        if (ctx.message.text == config.password) {
+        if (ctx.message.text == correct_password) {
             // Add the new user to the database
             await addUser(ctx.from.id, ''); // You can set the unit value as needed
 
@@ -164,7 +166,7 @@ export async function initBot() {
 
     if (token == null) {
         console.error("ERROR: Telegram bot token is not set.");
-        process.exit(1);
+        return;
     }
 
     bot = new Telegraf(token);
