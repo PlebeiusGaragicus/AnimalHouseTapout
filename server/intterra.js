@@ -220,6 +220,12 @@ async function processUnitUpdates(updates) {
     // Retrieve all users from the database
     const users = await getAllUsers();
 
+    // if there are no users....
+    if (!users) {
+        console.log("No users in database.  Not sending alerts.");
+        return;
+    }
+
     // Filter the tappedOutUnits to only include units with registered users
     const tappedOutUnitsWithUsers = new Set(
         [...tappedOutUnits].filter((unit) => users.some((user) => user.unit === unit))
