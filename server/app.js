@@ -35,7 +35,6 @@ app.listen(PORT, () => {
 });
 
 app.get("/settings", async (req, res) => {
-    // TODO: should I just redo this whole function with getters?
     const collection = db.collection(DB_COLLECTION_NAME);
 
     const botToken = await collection.findOne({ name: "telegram_bot_token" });
@@ -55,7 +54,6 @@ app.get("/settings", async (req, res) => {
 app.post('/settings', async (req, res) => {
     const { botToken, registryPassword, intterraUsername, intterraPassword } = req.body;
 
-    // TODO: should I just redo this whole function with setters?
     try {
         const collection = db.collection(DB_COLLECTION_NAME);
 
@@ -84,6 +82,9 @@ app.post('/settings', async (req, res) => {
 
 //// SETUP THE DATABASE
 await connectToMongoDB();
+
+// TODO - we need to purge all the pending messages when the bot was offline
+// purgeThatShit();
 
 initBot();
 
