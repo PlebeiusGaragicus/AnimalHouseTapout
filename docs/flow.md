@@ -2,7 +2,7 @@
 
 /start
 "Welcome to the Tapout Bot! Enter the password:"
->Mel's mom
+>your mother
 
 "That's wrong - try again.  I will ban you after ${} failed attempts."
 >asdf
