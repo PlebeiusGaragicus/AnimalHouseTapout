@@ -83,6 +83,9 @@ app.post('/settings', async (req, res) => {
 //// SETUP THE DATABASE
 await connectToMongoDB();
 
+// TODO - we need to purge all the pending messages when the bot was offline
+// purgeThatShit();
+
 initBot();
 
 runIntterra();
