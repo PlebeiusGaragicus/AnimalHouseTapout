@@ -1,0 +1,70 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Bot Settings</title>
+    <style>
+        input[type="text"] {
+            font-size: 20px;
+            padding: 5px;
+            border: 2px solid #000;
+            background-color: bisque;
+            width: 100%;
+            box-sizing: border-box;
+            margin-bottom: 10px;
+        }
+
+        label {
+            font-size: 22px;
+            display: block;
+            margin-bottom: 5px;
+        }
+
+        button[type="submit"] {
+            font-size: 18px;
+            font-weight: bold;
+            padding: 10px 20px;
+            background-color: #4CAF50;
+            color: white;
+            border: none;
+            cursor: pointer;
+            margin-top: 10px;
+        }
+
+        button[type="submit"]:hover {
+            background-color: #45a049;
+        }
+
+        body {
+            background-color: #201f1f;
+            color: #efff15;
+        }
+
+        h1 {
+            font-size: 48px;
+            text-align: center;
+            color: #00eeff;
+        }
+    </style>
+</head>
+
+<body>
+    <h1>AnimalHouseTapout Bot Settings</h1>
+    <form id="settingsForm">
+        <label for="botToken">Telegram Bot API Token:</label>
+        <input type="text" id="botToken" name="botToken" placeholder="unset">
+        <br>
+        <label for="intterraUsername">Intterra username:</label>
+        <input type="text" id="intterraUsername" name="intterraUsername" placeholder="unset">
+        <br>
+        <label for="intterraPassword">Intterra password:</label>
+        <input type="text" id="intterraPassword" name="intterraPassword" placeholder="unset">
+        <br>
+        <button type="submit">Save</button>
+    </form>
+    <script src="index.js"></script>
+</body>
+
+</html>
