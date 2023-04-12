@@ -81,29 +81,6 @@ export async function getUsersWithUnit() {
 
 
 
-// export async function addUser(user_chat_id, unit) {
-//     try {
-//         const collection = db.collection('users');
-//         const newUser = {
-//             user_chat_id: user_chat_id,
-//             unit: unit,
-//         };
-
-//         const result = await collection.insertOne(newUser);
-
-//         if (result.insertedCount !== 1) {
-// BUG!!!! I added myself but it says it failed to insert the new user...
-//             console.error('Failed to insert the new user');
-//             return null;
-//         }
-
-//         return newUser;
-
-//     } catch (error) {
-//         console.error(error);
-//     }
-// }
-
 export async function addUser(user_chat_id, unit) {
     try {
         const collection = db.collection('users');
