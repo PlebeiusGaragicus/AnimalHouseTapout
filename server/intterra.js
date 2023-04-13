@@ -22,35 +22,89 @@ let cookies = {
 
 
 
-async function getIncidentData() {
-    // console.log("getting incident data... here are the cookies:")
-    // console.log(cookies.access_token);
-    // console.log(cookies.refresh_token);
-    // console.log(cookies.agstoken);
+// async function getIncidentData() {
+//     // console.log("getting incident data... here are the cookies:")
+//     // console.log(cookies.access_token);
+//     // console.log(cookies.refresh_token);
+//     // console.log(cookies.agstoken);
 
-    const incidents = await fetch("https://dc.intterragroup.com/v1/sitstat/data/incidents", {
-        "headers": {
-            "accept": "application/json, text/javascript, */*; q=0.01",
-            "accept-language": "en-US,en;q=0.9",
-            "authorization": "Bearer " + cookies.access_token,
-            "sec-ch-ua": "\"Not:A-Brand\";v=\"99\", \"Chromium\";v=\"112\"",
-            "sec-ch-ua-mobile": "?0",
-            "sec-ch-ua-platform": "\"macOS\"",
-            "sec-fetch-dest": "empty",
-            "sec-fetch-mode": "cors",
-            "sec-fetch-site": "same-site",
-            "cookie": "access_token=" + cookies.access_token + "; refresh_token=" + cookies.refresh_token + "; agstoken=" + cookies.agstoken,
-            "Referer": "https://apps.intterragroup.com/",
-            "Referrer-Policy": "strict-origin-when-cross-origin"
-        },
-        "body": null,
-        "method": "POST"
-    })
-        .then(res => res.json())
-        .catch(err => console.log(err));
+//     const incidents = await fetch("https://dc.intterragroup.com/v1/sitstat/data/incidents", {
+//         "headers": {
+//             "accept": "application/json, text/javascript, */*; q=0.01",
+//             "accept-language": "en-US,en;q=0.9",
+//             "authorization": "Bearer " + cookies.access_token,
+//             "sec-ch-ua": "\"Not:A-Brand\";v=\"99\", \"Chromium\";v=\"112\"",
+//             "sec-ch-ua-mobile": "?0",
+//             "sec-ch-ua-platform": "\"macOS\"",
+//             "sec-fetch-dest": "empty",
+//             "sec-fetch-mode": "cors",
+//             "sec-fetch-site": "same-site",
+//             "cookie": "access_token=" + cookies.access_token + "; refresh_token=" + cookies.refresh_token + "; agstoken=" + cookies.agstoken,
+//             "Referer": "https://apps.intterragroup.com/",
+//             "Referrer-Policy": "strict-origin-when-cross-origin"
+//         },
+//         "body": null,
+//         "method": "POST"
+//     })
+//         .then(async res => await res.json())
+//         .catch(err => console.log(err));
 
-    console.log("fetched new incident list!");
-    // console.log(incidents);
+//     console.log("fetched new incident list!");
+//     // console.log(incidents);
+
+//     return incidents;
+// }
+
+async function getIncidentData(maxRetries = 3) {
+    let incidents = null;
+    let attempts = 0;
+
+    while (incidents === null && attempts < maxRetries) {
+        try {
+            incidents = await fetch("https://dc.intterragroup.com/v1/sitstat/data/incidents", {
+                "headers": {
+                    "accept": "application/json, text/javascript, */*; q=0.01",
+                    "accept-language": "en-US,en;q=0.9",
+                    "authorization": "Bearer " + cookies.access_token,
+                    "sec-ch-ua": "\"Not:A-Brand\";v=\"99\", \"Chromium\";v=\"112\"",
+                    "sec-ch-ua-mobile": "?0",
+                    "sec-ch-ua-platform": "\"macOS\"",
+                    "sec-fetch-dest": "empty",
+                    "sec-fetch-mode": "cors",
+                    "sec-fetch-site": "same-site",
+                    "cookie": "access_token=" + cookies.access_token + "; refresh_token=" + cookies.refresh_token + "; agstoken=" + cookies.agstoken,
+                    "Referer": "https://apps.intterragroup.com/",
+                    "Referrer-Policy": "strict-origin-when-cross-origin"
+                },
+                "body": null,
+                "method": "POST"
+            })
+                .then(res => res.json())
+                .catch(err => {
+                    console.log('Error fetching data:', err);
+                    return null;
+                });
+
+            // If the fetched data is not an array, set incidents to null so that the loop continues.
+            if (!Array.isArray(incidents)) {
+                incidents = null;
+            }
+        } catch (err) {
+            console.log('Error processing fetched data:', err);
+        }
+
+        attempts++;
+        if (incidents === null && attempts < maxRetries) {
+            // If you want to wait before retrying, you can use a delay (in milliseconds).
+            // For example, wait 2 seconds (2000 ms) before the next attempt:
+            await new Promise(resolve => setTimeout(resolve, 2000));
+        }
+    }
+
+    if (incidents === null) {
+        console.error('Failed to fetch incident data after', maxRetries, 'attempts');
+        // You can throw a custom exception here or handle the error as you wish
+    }
 
     return incidents;
 }
