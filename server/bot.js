@@ -140,19 +140,20 @@ export async function killBot() {
             return;
         }
 
-        console.log("Telling the users the bot is shutting down...")
-        for (const u of users) {
-            console.log("telling user:", u.user_chat_id);
-            await
-                bot.telegram.sendMessage(u.user_chat_id, `⚠️ *BOT SHUTDOWN\\!* ⚠️`, { parse_mode: 'MarkdownV2' })
-                    .then(() => {
-                        console.log("process exiting...");
-                    })
-                    .catch((err) => {
-                        console.error(err);
-                        reject(err);
-                    });
-        }
+        // TODO - maybe only tell ME that the bot is shutting down... or has an error?  (but sometimes it doesn't do this...)
+        // console.log("Telling the users the bot is shutting down...")
+        // for (const u of users) {
+        //     console.log("telling user:", u.user_chat_id);
+        //     await
+        //         bot.telegram.sendMessage(u.user_chat_id, `⚠️ *BOT SHUTDOWN\\!* ⚠️`, { parse_mode: 'MarkdownV2' })
+        //             .then(() => {
+        //                 console.log("process exiting...");
+        //             })
+        //             .catch((err) => {
+        //                 console.error(err);
+        //                 reject(err);
+        //             });
+        // }
         resolve();
     });
 };

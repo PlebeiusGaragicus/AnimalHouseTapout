@@ -12,6 +12,7 @@ import { bot } from './bot.js';
 import config from './config.js';
 
 let browser = null;
+let page = null;
 
 let cookies = {
     access_token: null,
@@ -85,6 +86,8 @@ async function getIncidentData(maxRetries = 3) {
                     return null;
                 });
 
+            console.log(incidents);
+
             // If the fetched data is not an array, set incidents to null so that the loop continues.
             if (!Array.isArray(incidents)) {
                 incidents = null;
@@ -108,6 +111,30 @@ async function getIncidentData(maxRetries = 3) {
 
     return incidents;
 }
+
+async function getCookies(page) {
+    console.log("CURRENT COOKIES:");
+    console.log('access_token:', cookies.access_token);
+    console.log('refresh_token:', cookies.refresh_token);
+    console.log('agstoken:', cookies.agstoken);
+
+    const page_cookies = await page.cookies();
+    const at = page_cookies.find(cookie => cookie.name === 'access_token');
+    cookies.access_token = at.value;
+
+    const rt = page_cookies.find(cookie => cookie.name === 'refresh_token');
+    cookies.refresh_token = rt.value;
+
+    // This token seems to change a few times after login and needs time to "settle"
+    const ags = page_cookies.find(cookie => cookie.name === 'agstoken');
+    cookies.agstoken = ags.value;
+
+    console.log("NEW COOKIES:");
+    console.log('access_token:', cookies.access_token);
+    console.log('refresh_token:', cookies.refresh_token);
+    console.log('agstoken:', cookies.agstoken);
+}
+
 
 
 // TODO - this explainer is out-of-date
@@ -140,13 +167,15 @@ export async function runIntterra() {
     }
 
     browser = await puppeteer.launch({ headless: config.debug ? false : true });
-    const page = await browser.newPage();
+    // const page = await browser.newPage();
+    page = await browser.newPage();
 
     const client = await page.target().createCDPSession();
     await client.send('Network.enable');
 
-    client.on('Network.webSocketCreated', ({ requestId, url }) => {
+    client.on('Network.webSocketCreated', async ({ requestId, url }) => {
         console.log(`WebSocket created:`);
+        await getCookies(page);
     });
 
     client.on('Network.webSocketClosed', ({ requestId, timestamp }) => {
@@ -159,36 +188,35 @@ export async function runIntterra() {
 
     // TODO: this doesn't always work without me clicking the link... sometimes.
     // Navigate to the login page
+    const navigationPromise = page.waitForNavigation();
     await page.goto('https://apps.intterragroup.com');
-    await page.waitForSelector('[name="username"]');
+    await navigationPromise;
 
-    // Fill in the login form and submit
+    await page.waitForSelector('[name="username"]');
     await page.type('[name="username"]', user);
     await page.type('[name="password"]', pass);
-    // await page.waitForSelector('button.primary');
-    // await page.click('button.primary');
-
-    const navigationPromise = page.waitForNavigation();
+    await page.waitForSelector('button.primary');
     await page.click('button.primary');
-    await navigationPromise;
 
     /// TODO it's possible to get a sitstat update before this timeout.. therefore we won't have the proper cookies to do an incident list fetch.. HMMMMMM.
     // sleep for 5 seconds
-    await page.waitForTimeout(3000);
+    // await page.waitForTimeout(3000);
 
-    const page_cookies = await page.cookies();
-    const at = page_cookies.find(cookie => cookie.name === 'access_token');
-    console.log('access_token:', at.value);
-    cookies.access_token = at.value;
+    // await getCookies(page);
 
-    const rt = page_cookies.find(cookie => cookie.name === 'refresh_token');
-    console.log('refresh_token:', rt.value);
-    cookies.refresh_token = rt.value;
+    // const page_cookies = await page.cookies();
+    // const at = page_cookies.find(cookie => cookie.name === 'access_token');
+    // console.log('access_token:', at.value);
+    // cookies.access_token = at.value;
 
-    // This token seems to change a few times after login and needs time to "settle"
-    const ags = page_cookies.find(cookie => cookie.name === 'agstoken');
-    cookies.agstoken = ags.value;
-    console.log('agstoken:', cookies.agstoken);
+    // const rt = page_cookies.find(cookie => cookie.name === 'refresh_token');
+    // console.log('refresh_token:', rt.value);
+    // cookies.refresh_token = rt.value;
+
+    // // This token seems to change a few times after login and needs time to "settle"
+    // const ags = page_cookies.find(cookie => cookie.name === 'agstoken');
+    // cookies.agstoken = ags.value;
+    // console.log('agstoken:', cookies.agstoken);
 }
 
 
@@ -211,12 +239,17 @@ async function handleWebSocketFrameReceived({ requestId, timestamp, response }) 
         return
     }
 
-    console.log("WebSocket sitstat update received...");
+    // console.log("WebSocket sitstat update received...");
+    // console.log("<...>")
+    // process.stdout.write("sitstat <...>");
+    process.stdout.write("...");
 
     const units = [];
 
-    for (const i of data[1].units)
-        units.push({ unit: i.id, incidentId: i.incidentId, lat: i.latitude, lon: i.longitude, bearing: i.bearing });
+    for (const i of data[1].units) {
+        // console.log(i);
+        units.push({ unit: i.id, incidentId: i.incidentId, status: i.statusCode, lat: i.latitude, lon: i.longitude, bearing: i.bearing });
+    }
 
     processUnitUpdates(units);
 }
@@ -242,6 +275,12 @@ async function processUnitUpdates(updates) {
 
         unitStatusMap.set(unit, { incidentId, lat, lon });
     }
+
+
+    // THIS DOESN"T WORK BECAUSE SITSTAT DOESN"T SEND A LIST OF EVERY UNIT>.. but over time it will build up.. but whatever...
+    // remove units with id's that don't start with 'M'
+    // const clearedMedics = [...unitStatusMap.entries()].filter(([unitKey, unitValue]) => unitValue.incidentId !== null && unitKey.startsWith('M') && unitValue.status === 'AV');
+    // console.log(`AMR at level: ${clearedMedics.length}`)
 
     // Retrieve all users from the database
     const users = await getAllUsers();
