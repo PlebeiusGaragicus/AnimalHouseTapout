@@ -367,3 +367,54 @@ export async function killIntterra() {
 //     await killIntterra();
 //     await runIntterra();
 // }
+
+
+
+
+//// FEEDBACK - DOCUMENTATION STYLE
+
+/*
+The intterra.js file is a web scraping script that handles the interaction with the Intterra website. The purpose of this script is to listen for updates from the Intterra server, fetch incident data, and alert users when their assigned unit is tapped out on an incident.
+
+Here is a brief overview of each function in the file:
+
+getIncidentData(maxRetries = 3): This function fetches incident data from the Intterra server, handling retries if the fetch fails.
+getCookies(page): This function retrieves the access_token, refresh_token, and agstoken cookies from the Puppeteer page.
+runIntterra(): This function initializes the Puppeteer browser, logs into the Intterra website, and sets up listeners for WebSocket events.
+handleWebSocketFrameReceived({ requestId, timestamp, response }): This function processes incoming WebSocket frames, filtering out non-sitstat messages and calling processUnitUpdates(units) with the parsed sitstat data.
+processUnitUpdates(updates): This function updates the unit status map and checks if any registered units have been tapped out. If so, it fetches incident data and sends alerts to users.
+alertUsersForTappedOutUnits(tappedOutUnits, incidents): This function sends alerts to registered users when their assigned unit is tapped out on an incident.
+alertUser(chatID, call): This function sends an alert message to a user with the given chatID, containing details of the call.
+killIntterra(): This function closes the Puppeteer browser.
+export async function restartIntterra(): This commented-out function is intended to restart the Intterra web scraping process by calling killIntterra() and runIntterra().
+The script uses Puppeteer to launch a browser, log in to the Intterra website, and listen for WebSocket updates. When a unit's status changes, the script fetches the updated incident data and alerts the users who have registered for that unit.
+*/
+
+//// FEEDBACK
+
+/*
+Here are some tips and best practice advice related to the intterra.js file:
+
+Modularization and separation of concerns:
+Consider breaking down the file into smaller, more focused modules. For example, separate the web scraping logic, incident data fetching, and alerting users into different files or modules. This makes the code easier to understand and maintain.
+Error handling:
+Make sure to handle errors gracefully, especially in the functions that involve network requests, such as getIncidentData. Use try-catch blocks to catch errors and handle them accordingly.
+Add more error handling in handleWebSocketFrameReceived, as this function might encounter malformed JSON data that could cause the JSON.parse to throw an error.
+Use constants or configuration files for values that might change:
+Consider moving the hard-coded URLs, such as 'https://apps.intterragroup.com' and 'https://dc.intterragroup.com/v1/sitstat/data/incidents', to a configuration file or to constants at the top of the file. This makes it easier to update them if needed.
+Avoid using global variables when possible:
+browser, page, and cookies are currently global variables. Consider refactoring the code to reduce their scope or pass them as parameters to the necessary functions.
+Code comments and documentation:
+Make sure to update any outdated comments, and add comments to describe the purpose of each function and how it works. This will help others (and yourself) understand the code more easily in the future.
+Optimize the processUnitUpdates function:
+Instead of calling getAllUsers() for each update, consider fetching the users once and passing them to the function as a parameter. This will reduce the number of database queries and improve performance.
+Use a more robust method for cleaning WebSocket messages:
+The current method for cleaning WebSocket messages in handleWebSocketFrameReceived involves a simple string replace. Consider using a more reliable method, such as parsing the message and re-encoding it without the unwanted data.
+Improve the WebSocket event handling:
+The WebSocket event listeners should handle reconnecting in case the connection is lost or closed. Consider adding logic to re-establish the connection and resume listening for updates.
+Use template literals for string concatenation:
+In the alertUser function, consider using template literals for better readability and ease of use when constructing the message string.
+Validate user input:
+If you are using user-provided data (e.g., unit names), make sure to validate and sanitize it before using it in your code to avoid potential security risks.
+*/
+

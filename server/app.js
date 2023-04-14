@@ -89,3 +89,42 @@ await connectToMongoDB();
 initBot();
 
 runIntterra();
+
+
+
+
+
+//// FEEDBACK:
+/*
+Overall, your app.js file seems to be well structured and covers the basic functionality of a Node.js web scraper application. However, I'd like to provide some advice, best practices, and tips to help you improve it:
+
+Use environment variables for sensitive information: Instead of storing sensitive information like API tokens, usernames, and passwords in your database, consider using environment variables. This helps protect sensitive information and is easier to manage when deploying your application.
+Use a linter: Consider using a linter like ESLint to enforce consistent code style and catch potential issues early on. This can help you write cleaner and more maintainable code.
+Error handling: Use Express's built-in error handling middleware for better error handling. You can create a custom error handling middleware to send consistent error responses.
+Use helmet for security: Add the helmet middleware to your Express app to enable some essential security headers. This can help protect your app from common web vulnerabilities.
+Modularize your routes: Separate your route handling logic into separate modules (e.g., create a routes folder and a file for each route). This can make your code more organized and maintainable.
+Use async/await consistently: Some of your functions use async/await, while others use Promises (e.g., app.post('/settings', async (req, res) => { ... }). Stick to one approach for better readability and consistency.
+Be more specific with your status codes: When sending a response, consider using more specific status codes instead of just 200 and 500. This can help clients understand the response better.
+Add comments and documentation: Write comments and documentation to describe the functionality of your code. This can help other developers understand your code better and make it easier for you to maintain your code in the future.
+Consider using a logger: Instead of using console.log and console.error, consider using a logging library like winston or bunyan. These libraries offer more control and flexibility over logging output.
+Use a .gitignore file: If you're using version control (e.g., Git), create a .gitignore file to exclude sensitive information, log files, and node_modules from your repository. This can help prevent accidental disclosure of sensitive data and reduce repository size.
+Here's an example of how you could update the error handling in your Express app using a custom error handling middleware:
+*/
+
+// app.use((err, req, res, next) => {
+//     console.error(err.stack);
+//     res.status(err.status || 500).json({
+//       message: err.message || "An unknown error occurred",
+//     });
+//   });
+
+// Make sure to place this middleware after your routes. When you want to handle an error, you can pass it to the next() function in your route handlers. For example:
+
+// app.post("/settings", async (req, res, next) => {
+//     // ...
+//     try {
+//       // ...
+//     } catch (error) {
+//       next(error);
+//     }
+//   });

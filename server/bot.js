@@ -175,3 +175,59 @@ export async function initBot() {
     bot.launch();
     setupBot(bot);
 }
+
+
+
+
+//// FEEDBACK
+
+/*
+Your bot.js file seems to have a good structure and functionality for a Telegram bot. I'll provide some advice, best practices, and tips to help you improve it:
+
+Use a more descriptive name for your bot: Rename bot.js to something more descriptive, like telegramBot.js or notificationBot.js. This can make it easier to understand the purpose of the file.
+Use constants for strings: Extract commonly used strings and user prompts into constants. This can help maintain consistency and make it easier to update these strings in the future.
+Use a state management library: Instead of using Set to manage user states, consider using a state management library like telegraf-state or a database to store user states. This can help you manage user states more efficiently and make your code more scalable.
+Modularize your code: Separate your command handlers into separate functions or even different files. This can help make your code more organized and maintainable.
+Use template literals: When sending replies with dynamic content, consider using template literals instead of string concatenation. This can make your code more readable.
+Add comments and documentation: Write comments and documentation to describe the functionality of your code. This can help other developers understand your code better and make it easier for you to maintain your code in the future.
+Error handling: Add error handling to your bot, especially when interacting with external services like the Telegram API. This can help you handle errors gracefully and provide more informative feedback to users.
+Here's an example of how you could modularize your command handlers and use template literals:
+*/
+
+// async function handleUnitCommand(ctx) {
+//     if (await userExists(ctx.from.id)) {
+//       ctx.reply("Please enter your unit:");
+//       usersAwaitingUnit.add(ctx.from.id);
+//     } else {
+//       ctx.reply("Please register using the /start command before setting your unit.");
+//     }
+//   }
+  
+//   async function handleStopCommand(ctx) {
+//     if (await userExists(ctx.from.id)) {
+//       const updateSuccessful = await updateUserUnit(ctx.from.id, "");
+  
+//       if (updateSuccessful) {
+//         ctx.reply("Unit cleared. Have a good day!");
+//       } else {
+//         ctx.reply("Failed to clear unit. Please try again.");
+//       }
+//     } else {
+//       ctx.reply("Please register using the /start command before using the /stop command.");
+//     }
+//   }
+  
+//   export async function setupBot(bot) {
+//     bot.command("start", handleStartCommand);
+//     bot.command("unit", handleUnitCommand);
+//     bot.command("stop", handleStopCommand);
+//     bot.on("text", handleText);
+//   }
+  
+//   // Use template literals for better readability
+//   ctx.reply(`bro... I'm not a chat bot...
+//   \nuse /unit to set your unit.
+//   \nuse /stop when you get off shift
+//   \nYou are registered on the following units: ${await getUserUnit(ctx.from.id)}`);
+
+
