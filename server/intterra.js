@@ -1,15 +1,15 @@
 import puppeteer from 'puppeteer';
 import fetch from 'node-fetch';
 
+import config from './config.js';
+import logger from './logger.js';
 import { getValue, getAllUsers } from './database.js';
-import { bot } from './bot.js';
+import { bot } from './telegramBot.js';
 
 
 // REFERENCE: the path to the units: https://dc.intterragroup.com/v1/sitstat/data/units
 // https://developers.google.com/maps/documentation/urls/get-started
 
-
-import config from './config.js';
 
 let browser = null;
 let page = null;
@@ -22,47 +22,13 @@ let cookies = {
 
 
 
-
-// async function getIncidentData() {
-//     // console.log("getting incident data... here are the cookies:")
-//     // console.log(cookies.access_token);
-//     // console.log(cookies.refresh_token);
-//     // console.log(cookies.agstoken);
-
-//     const incidents = await fetch("https://dc.intterragroup.com/v1/sitstat/data/incidents", {
-//         "headers": {
-//             "accept": "application/json, text/javascript, */*; q=0.01",
-//             "accept-language": "en-US,en;q=0.9",
-//             "authorization": "Bearer " + cookies.access_token,
-//             "sec-ch-ua": "\"Not:A-Brand\";v=\"99\", \"Chromium\";v=\"112\"",
-//             "sec-ch-ua-mobile": "?0",
-//             "sec-ch-ua-platform": "\"macOS\"",
-//             "sec-fetch-dest": "empty",
-//             "sec-fetch-mode": "cors",
-//             "sec-fetch-site": "same-site",
-//             "cookie": "access_token=" + cookies.access_token + "; refresh_token=" + cookies.refresh_token + "; agstoken=" + cookies.agstoken,
-//             "Referer": "https://apps.intterragroup.com/",
-//             "Referrer-Policy": "strict-origin-when-cross-origin"
-//         },
-//         "body": null,
-//         "method": "POST"
-//     })
-//         .then(async res => await res.json())
-//         .catch(err => console.log(err));
-
-//     console.log("fetched new incident list!");
-//     // console.log(incidents);
-
-//     return incidents;
-// }
-
 async function getIncidentData(maxRetries = 3) {
     let incidents = null;
     let attempts = 0;
 
     while (incidents === null && attempts < maxRetries) {
         try {
-            incidents = await fetch("https://dc.intterragroup.com/v1/sitstat/data/incidents", {
+            incidents = await fetch(config.URL_INCIDENT_ENDPOINT, {
                 "headers": {
                     "accept": "application/json, text/javascript, */*; q=0.01",
                     "accept-language": "en-US,en;q=0.9",
@@ -82,18 +48,21 @@ async function getIncidentData(maxRetries = 3) {
             })
                 .then(res => res.json())
                 .catch(err => {
-                    console.log('Error fetching data:', err);
+                    // console.log('Error fetching data:', err);
+                    logger.error('Error fetching data:', err);
                     return null;
                 });
 
-            console.log(incidents);
+            // console.log(incidents);
+            logger.debug(incidents);
 
             // If the fetched data is not an array, set incidents to null so that the loop continues.
             if (!Array.isArray(incidents)) {
                 incidents = null;
             }
         } catch (err) {
-            console.log('Error processing fetched data:', err);
+            // console.log('Error processing fetched data:', err);
+            logger.error('Error processing fetched data:', err);
         }
 
         attempts++;
@@ -105,7 +74,8 @@ async function getIncidentData(maxRetries = 3) {
     }
 
     if (incidents === null) {
-        console.error('Failed to fetch incident data after', maxRetries, 'attempts');
+        // console.error('Failed to fetch incident data after', maxRetries, 'attempts');
+        logger.error('Failed to fetch incident data after', maxRetries, 'attempts');
         // You can throw a custom exception here or handle the error as you wish
     }
 
@@ -113,10 +83,11 @@ async function getIncidentData(maxRetries = 3) {
 }
 
 async function getCookies(page) {
-    console.log("CURRENT COOKIES:");
-    console.log('access_token:', cookies.access_token);
-    console.log('refresh_token:', cookies.refresh_token);
-    console.log('agstoken:', cookies.agstoken);
+    // TODO: instead I could log if they change or not... instead of placing them in a log file (security risk?)
+    logger.debug("CURRENT COOKIES:");
+    logger.debug(`access_token: ${cookies.access_token}`);
+    logger.debug(`refresh_token: ${cookies.refresh_token}`);
+    logger.debug(`agstoken: ${cookies.agstoken}`);
 
     const page_cookies = await page.cookies();
     const at = page_cookies.find(cookie => cookie.name === 'access_token');
@@ -129,10 +100,10 @@ async function getCookies(page) {
     const ags = page_cookies.find(cookie => cookie.name === 'agstoken');
     cookies.agstoken = ags.value;
 
-    console.log("NEW COOKIES:");
-    console.log('access_token:', cookies.access_token);
-    console.log('refresh_token:', cookies.refresh_token);
-    console.log('agstoken:', cookies.agstoken);
+    logger.debug("CURRENT COOKIES:");
+    logger.debug(`access_token: ${cookies.access_token}`);
+    logger.debug(`refresh_token: ${cookies.refresh_token}`);
+    logger.debug(`agstoken: ${cookies.agstoken}`);
 }
 
 
@@ -153,16 +124,21 @@ export async function runIntterra() {
 
     const user = await getValue('intterra_username');
     const pass = await getValue('intterra_password');
-    console.log("user: ", user, " pass: ", pass);
+    // console.log("user: ", user, " pass: ", pass);
+    // TODO maybe don't do this?
+    logger.debug("user: ", user, " pass: ", pass);
     if (!user || !pass) {
-        console.error("Intterra username or password not set in database");
+        // console.error("Intterra username or password not set in database");
+        logger.error("Intterra username or password not set in database");
         return;
     }
 
     const user_password = await getValue('registry_password');
     if (!user_password) {
-        console.error("Registry password not set in database");
-        console.log("not running intterra...")
+        // console.error("Registry password not set in database");
+        logger.error("Registry password not set in database");
+        // console.log("not running intterra...")
+        logger.error("not running intterra...")
         return;
     }
 
@@ -174,12 +150,14 @@ export async function runIntterra() {
     await client.send('Network.enable');
 
     client.on('Network.webSocketCreated', async ({ requestId, url }) => {
-        console.log(`WebSocket created:`);
+        // console.log(`WebSocket created:`);
+        logger.info(`WebSocket created:`);
         await getCookies(page);
     });
 
     client.on('Network.webSocketClosed', ({ requestId, timestamp }) => {
-        console.log(`WebSocket closed.`);
+        // console.log(`WebSocket closed.`);
+        logger.info(`WebSocket closed.`);
         // TODO - we need to handle failers here... if the websocket closes, we need to re-login and re-establish the websocket
         // maybe as easy as running restartIntterra() ???
     });
@@ -189,7 +167,7 @@ export async function runIntterra() {
     // TODO: this doesn't always work without me clicking the link... sometimes.
     // Navigate to the login page
     const navigationPromise = page.waitForNavigation();
-    await page.goto('https://apps.intterragroup.com');
+    await page.goto(config.URL_LOGIN);
     await navigationPromise;
 
     await page.waitForSelector('[name="username"]');
@@ -203,20 +181,6 @@ export async function runIntterra() {
     // await page.waitForTimeout(3000);
 
     // await getCookies(page);
-
-    // const page_cookies = await page.cookies();
-    // const at = page_cookies.find(cookie => cookie.name === 'access_token');
-    // console.log('access_token:', at.value);
-    // cookies.access_token = at.value;
-
-    // const rt = page_cookies.find(cookie => cookie.name === 'refresh_token');
-    // console.log('refresh_token:', rt.value);
-    // cookies.refresh_token = rt.value;
-
-    // // This token seems to change a few times after login and needs time to "settle"
-    // const ags = page_cookies.find(cookie => cookie.name === 'agstoken');
-    // cookies.agstoken = ags.value;
-    // console.log('agstoken:', cookies.agstoken);
 }
 
 
@@ -242,6 +206,7 @@ async function handleWebSocketFrameReceived({ requestId, timestamp, response }) 
     // console.log("WebSocket sitstat update received...");
     // console.log("<...>")
     // process.stdout.write("sitstat <...>");
+    // TODO... well shit
     process.stdout.write("...");
 
     const units = [];
@@ -266,9 +231,11 @@ async function processUnitUpdates(updates) {
         // Check if the unit already exists in the unitStatusMap and if the incidentID has changed
         if (unitStatusMap.has(unit) && unitStatusMap.get(unit).incidentId !== incidentId) {
             if (incidentId === null)
-                console.log(`${unit} cleared`);
+                // console.log(`${unit} cleared`);
+                logger.info(`${unit} cleared`);
             else {
-                console.log(`TAPOUT: ${unit} on ${incidentId}`);
+                // console.log(`TAPOUT: ${unit} on ${incidentId}`);
+                logger.info(`TAPOUT: ${unit} on ${incidentId}`);
                 tappedOutUnits.add(unit);
             }
         }
@@ -287,7 +254,8 @@ async function processUnitUpdates(updates) {
 
     // if there are no users....
     if (!users) {
-        console.log("No users in database.  Not sending alerts.");
+        // console.log("No users in database.  Not sending alerts.");
+        logger.warn("No users in database.  Not sending alerts.");
         return;
     }
 
@@ -339,7 +307,8 @@ async function alertUsersForTappedOutUnits(tappedOutUnits, incidents) {
 
 
 async function alertUser(chatID, call) {
-    console.log("TAPOUT TAPOUT TAPOUT TAPOUT TAPOUT TAPOUT!")
+    // console.log("TAPOUT TAPOUT TAPOUT TAPOUT TAPOUT TAPOUT!")
+    logger.info("TAPOUT TAPOUT TAPOUT TAPOUT TAPOUT TAPOUT!")
 
     const google_URL = `https://www.google.com/maps/search/?api=1&query=${call.lat}%2C${call.lon}`
     const where = `\n${call.address}\n\n${google_URL}`
@@ -355,18 +324,57 @@ async function alertUser(chatID, call) {
 
 export async function killIntterra() {
     if (browser) {
-        console.log("Closing Intterra browser");
+        // console.log("Closing Intterra browser");
+        logger.info("Closing Intterra browser");
         await browser.close();
     }
 }
-
-
-
 
 // export async function restartIntterra() {
 //     await killIntterra();
 //     await runIntterra();
 // }
+
+
+//// FEEDBACK
+
+/*
+Here are some tips and best practice advice related to the intterra.js file:
+
+[ ] Modularization and separation of concerns:
+Consider breaking down the file into smaller, more focused modules. For example, separate the web scraping logic, incident data fetching, and alerting users into different files or modules. This makes the code easier to understand and maintain.
+
+
+[ ] Error handling:
+Make sure to handle errors gracefully, especially in the functions that involve network requests, such as getIncidentData. Use try-catch blocks to catch errors and handle them accordingly.
+Add more error handling in handleWebSocketFrameReceived, as this function might encounter malformed JSON data that could cause the JSON.parse to throw an error.
+
+[ ] Avoid using global variables when possible:
+browser, page, and cookies are currently global variables. Consider refactoring the code to reduce their scope or pass them as parameters to the necessary functions.
+
+[ ] Code comments and documentation
+
+[ ] Optimize the processUnitUpdates function:
+Instead of calling getAllUsers() for each update, consider fetching the users once and passing them to the function as a parameter. This will reduce the number of database queries and improve performance.
+
+
+[ ] Use a more robust method for cleaning WebSocket messages:
+The current method for cleaning WebSocket messages in handleWebSocketFrameReceived involves a simple string replace. Consider using a more reliable method, such as parsing the message and re-encoding it without the unwanted data.
+
+
+[ ] Improve the WebSocket event handling:
+The WebSocket event listeners should handle reconnecting in case the connection is lost or closed. Consider adding logic to re-establish the connection and resume listening for updates.
+
+
+[ ] Use template literals for string concatenation:
+In the alertUser function, consider using template literals for better readability and ease of use when constructing the message string.
+
+
+[ ] Validate user input:
+If you are using user-provided data (e.g., unit names), make sure to validate and sanitize it before using it in your code to avoid potential security risks.
+*/
+
+
 
 
 
@@ -389,32 +397,3 @@ killIntterra(): This function closes the Puppeteer browser.
 export async function restartIntterra(): This commented-out function is intended to restart the Intterra web scraping process by calling killIntterra() and runIntterra().
 The script uses Puppeteer to launch a browser, log in to the Intterra website, and listen for WebSocket updates. When a unit's status changes, the script fetches the updated incident data and alerts the users who have registered for that unit.
 */
-
-//// FEEDBACK
-
-/*
-Here are some tips and best practice advice related to the intterra.js file:
-
-Modularization and separation of concerns:
-Consider breaking down the file into smaller, more focused modules. For example, separate the web scraping logic, incident data fetching, and alerting users into different files or modules. This makes the code easier to understand and maintain.
-Error handling:
-Make sure to handle errors gracefully, especially in the functions that involve network requests, such as getIncidentData. Use try-catch blocks to catch errors and handle them accordingly.
-Add more error handling in handleWebSocketFrameReceived, as this function might encounter malformed JSON data that could cause the JSON.parse to throw an error.
-Use constants or configuration files for values that might change:
-Consider moving the hard-coded URLs, such as 'https://apps.intterragroup.com' and 'https://dc.intterragroup.com/v1/sitstat/data/incidents', to a configuration file or to constants at the top of the file. This makes it easier to update them if needed.
-Avoid using global variables when possible:
-browser, page, and cookies are currently global variables. Consider refactoring the code to reduce their scope or pass them as parameters to the necessary functions.
-Code comments and documentation:
-Make sure to update any outdated comments, and add comments to describe the purpose of each function and how it works. This will help others (and yourself) understand the code more easily in the future.
-Optimize the processUnitUpdates function:
-Instead of calling getAllUsers() for each update, consider fetching the users once and passing them to the function as a parameter. This will reduce the number of database queries and improve performance.
-Use a more robust method for cleaning WebSocket messages:
-The current method for cleaning WebSocket messages in handleWebSocketFrameReceived involves a simple string replace. Consider using a more reliable method, such as parsing the message and re-encoding it without the unwanted data.
-Improve the WebSocket event handling:
-The WebSocket event listeners should handle reconnecting in case the connection is lost or closed. Consider adding logic to re-establish the connection and resume listening for updates.
-Use template literals for string concatenation:
-In the alertUser function, consider using template literals for better readability and ease of use when constructing the message string.
-Validate user input:
-If you are using user-provided data (e.g., unit names), make sure to validate and sanitize it before using it in your code to avoid potential security risks.
-*/
-
