@@ -12,9 +12,6 @@ import { runIntterra } from './intterra.js';
 process.on("SIGINT", closeApp);
 process.on("SIGTERM", closeApp);
 process.on('uncaughtException', (error) => {
-    // console.log(" ++++++++++ You done goofed ++++++++++ ");
-    logger.error("UNCAUGHT EXCEPTION:")
-    // console.error(error);
     logger.error(error);
 });
 
@@ -30,7 +27,6 @@ app.use(express.static(path.join(process.cwd(), 'public')));
 // });
 
 app.listen(PORT, () => {
-    // console.log(`Server is running on http://localhost:${PORT}`);
     logger.info(`Server is running on http://localhost:${PORT}`);
 });
 

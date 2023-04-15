@@ -4,7 +4,7 @@ import fetch from 'node-fetch';
 import config from './config.js';
 import logger from './logger.js';
 import { getValue, getAllUsers } from './database.js';
-import { bot } from './telegramBot.js';
+import { tapoutUser } from './telegramBot.js';
 
 
 // REFERENCE: the path to the units: https://dc.intterragroup.com/v1/sitstat/data/units
@@ -21,7 +21,14 @@ let cookies = {
 }
 
 
-
+/**
+ * Fetches incident data from the specified endpoint with a given number of retries.
+ *
+ * @async
+ * @param {number} [maxRetries=3] - The maximum number of retry attempts to fetch incident data.
+ * @returns {Promise<Array|null>} Returns the fetched incident data as an array or null if the attempts failed.
+ * @throws {Error} If there's an error while processing the fetched data.
+ */
 async function getIncidentData(maxRetries = 3) {
     let incidents = null;
     let attempts = 0;
@@ -48,12 +55,10 @@ async function getIncidentData(maxRetries = 3) {
             })
                 .then(res => res.json())
                 .catch(err => {
-                    // console.log('Error fetching data:', err);
-                    logger.error('Error fetching data:', err);
+                    logger.error(`Error fetching data: ${err}`);
                     return null;
                 });
 
-            // console.log(incidents);
             logger.debug(incidents);
 
             // If the fetched data is not an array, set incidents to null so that the loop continues.
@@ -61,8 +66,7 @@ async function getIncidentData(maxRetries = 3) {
                 incidents = null;
             }
         } catch (err) {
-            // console.log('Error processing fetched data:', err);
-            logger.error('Error processing fetched data:', err);
+            logger.error(`Error processing fetched data: ${err}`);
         }
 
         attempts++;
@@ -74,8 +78,7 @@ async function getIncidentData(maxRetries = 3) {
     }
 
     if (incidents === null) {
-        // console.error('Failed to fetch incident data after', maxRetries, 'attempts');
-        logger.error('Failed to fetch incident data after', maxRetries, 'attempts');
+        logger.error(`Failed to fetch incident data after ${maxRetries} attempts`);
         // You can throw a custom exception here or handle the error as you wish
     }
 
@@ -107,37 +110,24 @@ async function getCookies(page) {
 }
 
 
-
-// TODO - this explainer is out-of-date
-// here's the idea...
-// this function SOMEHOW listens in on the converstaion between the intterra website and the intterra server
-// it grabs the authorization tokens and listens to the websocket for updates
-// The websocket seems to send unit data every few seconds.
-// This data is just the data about the unit.. GPS location, current call, bearing, etc.  Not totally useful.
-// Once the unit I want has a call... I take the saved authorization tokens and make a call to the intterra server for the entire incident list.
-// Then I pair that with the unit data to get the call data I want... and sent it to the user.
 export async function runIntterra() {
     if (browser) {
-        console.log("Intterra is already running");
+        logger.warn("Intterra is already running");
         return;
     }
 
     const user = await getValue('intterra_username');
     const pass = await getValue('intterra_password');
-    // console.log("user: ", user, " pass: ", pass);
     // TODO maybe don't do this?
-    logger.debug("user: ", user, " pass: ", pass);
+    logger.debug(`user: ${user} pass: ${pass}`);
     if (!user || !pass) {
-        // console.error("Intterra username or password not set in database");
         logger.error("Intterra username or password not set in database");
         return;
     }
 
     const user_password = await getValue('registry_password');
     if (!user_password) {
-        // console.error("Registry password not set in database");
         logger.error("Registry password not set in database");
-        // console.log("not running intterra...")
         logger.error("not running intterra...")
         return;
     }
@@ -150,16 +140,14 @@ export async function runIntterra() {
     await client.send('Network.enable');
 
     client.on('Network.webSocketCreated', async ({ requestId, url }) => {
-        // console.log(`WebSocket created:`);
         logger.info(`WebSocket created:`);
         await getCookies(page);
     });
 
+    // NOTE: apparently when the websocket closes, some cookies are refreshed and a new websocket is opened.
+    // So as long as we refresh the cookies we are using, we can continue to fetch the incident list.
     client.on('Network.webSocketClosed', ({ requestId, timestamp }) => {
-        // console.log(`WebSocket closed.`);
         logger.info(`WebSocket closed.`);
-        // TODO - we need to handle failers here... if the websocket closes, we need to re-login and re-establish the websocket
-        // maybe as easy as running restartIntterra() ???
     });
 
     client.on('Network.webSocketFrameReceived', handleWebSocketFrameReceived);
@@ -185,34 +173,28 @@ export async function runIntterra() {
 
 
 async function handleWebSocketFrameReceived({ requestId, timestamp, response }) {
-    // console.log(`WebSocket message received: ${response.payloadData}`);
-
     const cleanedMessage = response.payloadData.replace(/^\d+/, '');
-    // console.log(cleanedMessage)
 
     // sometimes there are just numbers sent/received.  Typically client sends a 2 and server sends a 3
     if (cleanedMessage === '') {
-        // console.log("WebSocket message received: empty");
+        // logger.info("WebSocket message received: empty");
         return;
     }
 
     const data = JSON.parse(cleanedMessage);
 
     if (data[0] !== 'sitstat') {
-        // console.log("WebSocket message received: not sitstat");
+        logger.info("WebSocket message received: not sitstat");
         return
     }
 
-    // console.log("WebSocket sitstat update received...");
-    // console.log("<...>")
-    // process.stdout.write("sitstat <...>");
-    // TODO... well shit
+    // logger.info("WebSocket sitstat update received...");
+    // TODO... well shit... we don't need to log this to the file... but it's nice to see it working in real-time
     process.stdout.write("...");
 
     const units = [];
 
     for (const i of data[1].units) {
-        // console.log(i);
         units.push({ unit: i.id, incidentId: i.incidentId, status: i.statusCode, lat: i.latitude, lon: i.longitude, bearing: i.bearing });
     }
 
@@ -231,10 +213,8 @@ async function processUnitUpdates(updates) {
         // Check if the unit already exists in the unitStatusMap and if the incidentID has changed
         if (unitStatusMap.has(unit) && unitStatusMap.get(unit).incidentId !== incidentId) {
             if (incidentId === null)
-                // console.log(`${unit} cleared`);
                 logger.info(`${unit} cleared`);
             else {
-                // console.log(`TAPOUT: ${unit} on ${incidentId}`);
                 logger.info(`TAPOUT: ${unit} on ${incidentId}`);
                 tappedOutUnits.add(unit);
             }
@@ -247,14 +227,13 @@ async function processUnitUpdates(updates) {
     // THIS DOESN"T WORK BECAUSE SITSTAT DOESN"T SEND A LIST OF EVERY UNIT>.. but over time it will build up.. but whatever...
     // remove units with id's that don't start with 'M'
     // const clearedMedics = [...unitStatusMap.entries()].filter(([unitKey, unitValue]) => unitValue.incidentId !== null && unitKey.startsWith('M') && unitValue.status === 'AV');
-    // console.log(`AMR at level: ${clearedMedics.length}`)
+    // logger.info(`AMR at level: ${clearedMedics.length}`)
 
     // Retrieve all users from the database
     const users = await getAllUsers();
 
     // if there are no users....
     if (!users) {
-        // console.log("No users in database.  Not sending alerts.");
         logger.warn("No users in database.  Not sending alerts.");
         return;
     }
@@ -299,32 +278,17 @@ async function alertUsersForTappedOutUnits(tappedOutUnits, incidents) {
 
             // Send an alert to the user
             // await bot.telegram.sendMessage(user_chat_id, `⚠️ Your unit ${unit} has been tapped out on incident ${incident.incidentId}!`);
-            await alertUser(user_chat_id, call)
+            await tapoutUser(user_chat_id, call)
         }
     }
 }
 
 
 
-async function alertUser(chatID, call) {
-    // console.log("TAPOUT TAPOUT TAPOUT TAPOUT TAPOUT TAPOUT!")
-    logger.info("TAPOUT TAPOUT TAPOUT TAPOUT TAPOUT TAPOUT!")
-
-    const google_URL = `https://www.google.com/maps/search/?api=1&query=${call.lat}%2C${call.lon}`
-    const where = `\n${call.address}\n\n${google_URL}`
-    const what = `\n<b>${call.cadCode} ${call.cadDescription}</b>\n${call.narrative}\n\n`
-
-    const msg = `🚨 🚒💨\n${what}${where}`;
-
-    // I need to lookup the users's ChatID by searching the database for their assigned unit
-    // const chatID = await getValue('chat_id');
-    await bot.telegram.sendMessage(chatID, msg, { parse_mode: 'HTML' });
-}
 
 
 export async function killIntterra() {
     if (browser) {
-        // console.log("Closing Intterra browser");
         logger.info("Closing Intterra browser");
         await browser.close();
     }
@@ -336,23 +300,30 @@ export async function killIntterra() {
 // }
 
 
-//// FEEDBACK
 
 /*
+
+//// FEEDBACK - INTTERRA.JS
 Here are some tips and best practice advice related to the intterra.js file:
 
-[ ] Modularization and separation of concerns:
-Consider breaking down the file into smaller, more focused modules. For example, separate the web scraping logic, incident data fetching, and alerting users into different files or modules. This makes the code easier to understand and maintain.
+[ ] Validate user input:
+If you are using user-provided data (e.g., unit names), make sure to validate and sanitize it before using it in your code to avoid potential security risks.
+
 
 
 [ ] Error handling:
 Make sure to handle errors gracefully, especially in the functions that involve network requests, such as getIncidentData. Use try-catch blocks to catch errors and handle them accordingly.
 Add more error handling in handleWebSocketFrameReceived, as this function might encounter malformed JSON data that could cause the JSON.parse to throw an error.
 
-[ ] Avoid using global variables when possible:
-browser, page, and cookies are currently global variables. Consider refactoring the code to reduce their scope or pass them as parameters to the necessary functions.
 
 [ ] Code comments and documentation
+// here's the idea...
+// this function SOMEHOW listens in on the converstaion between the intterra website and the intterra server
+// it grabs the authorization tokens and listens to the websocket for updates
+// The websocket seems to send unit data every few seconds.
+// This data is just the data about the unit.. GPS location, current call, bearing, etc.  Not totally useful.
+// Once the unit I want has a call... I take the saved authorization tokens and make a call to the intterra server for the entire incident list.
+// Then I pair that with the unit data to get the call data I want... and sent it to the user.
 
 [ ] Optimize the processUnitUpdates function:
 Instead of calling getAllUsers() for each update, consider fetching the users once and passing them to the function as a parameter. This will reduce the number of database queries and improve performance.
@@ -365,23 +336,24 @@ The current method for cleaning WebSocket messages in handleWebSocketFrameReceiv
 [ ] Improve the WebSocket event handling:
 The WebSocket event listeners should handle reconnecting in case the connection is lost or closed. Consider adding logic to re-establish the connection and resume listening for updates.
 
-
-[ ] Use template literals for string concatenation:
-In the alertUser function, consider using template literals for better readability and ease of use when constructing the message string.
-
-
-[ ] Validate user input:
-If you are using user-provided data (e.g., unit names), make sure to validate and sanitize it before using it in your code to avoid potential security risks.
-*/
+[ ] Avoid using global variables when possible:
+browser, page, and cookies are currently global variables. Consider refactoring the code to reduce their scope or pass them as parameters to the necessary functions.
 
 
-
+[ ] Modularization and separation of concerns:
+Consider breaking down the file into smaller, more focused modules. For example,
+separate the web scraping logic, incident data fetching, and alerting users into different files
+or modules. This makes the code easier to understand and maintain.
+I HAVE DECIDED NOT TO DO THIS... AT LEAST NOT YET
 
 
 
-//// FEEDBACK - DOCUMENTATION STYLE
 
-/*
+
+
+
+[ ] USE CHATGPT to make my DOCUMENTATION
+
 The intterra.js file is a web scraping script that handles the interaction with the Intterra website. The purpose of this script is to listen for updates from the Intterra server, fetch incident data, and alert users when their assigned unit is tapped out on an incident.
 
 Here is a brief overview of each function in the file:
@@ -396,4 +368,6 @@ alertUser(chatID, call): This function sends an alert message to a user with the
 killIntterra(): This function closes the Puppeteer browser.
 export async function restartIntterra(): This commented-out function is intended to restart the Intterra web scraping process by calling killIntterra() and runIntterra().
 The script uses Puppeteer to launch a browser, log in to the Intterra website, and listen for WebSocket updates. When a unit's status changes, the script fetches the updated incident data and alerts the users who have registered for that unit.
+
+
 */

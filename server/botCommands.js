@@ -8,11 +8,9 @@ const usersAwaitingUnit = new Set();
 
 
 export async function handleStartCommand(ctx) {
-    // console.log("start command called - CHAT ID: ", ctx.chat.id, " - FROM: ", ctx.from.username, "User ID: ", ctx.from.id);
-    logger.info("start command called - CHAT ID: ", ctx.chat.id, " - FROM: ", ctx.from.username, "User ID: ", ctx.from.id);
+    logger.info(`start command called - CHAT ID: ${ctx.chat.id} - FROM: ${ctx.from.username} User ID: ${ctx.from.id}`);
 
     if (await userExists(ctx.from.id)) {
-        // console.log("but they are already a registered user");
         logger.info("This user is already registered.")
 
         // TODO: add a help message here
@@ -50,14 +48,12 @@ export async function handleUnitCommand(ctx) {
 // TODO: add a failed password counter and ban users for 3 days
 export async function handleText(ctx) {
     if (usersAwaitingPassword.has(ctx.from.id)) {
-        // console.log("FROM UNKNOWN USER: ", ctx.from.username, " - ", ctx.from.id);
-        // console.log("PASSWORD: ", ctx.message.text);
         logger.info(`a password attempt from: ${ctx.from.username} - ${ctx.from.id} was ${ctx.message.text}`);
 
         const correct_password = await getValue("registry_password")
 
         // NOTE: I think best practice says that we don't log this...
-        // console.log("Correct password: ", correct_password);
+        // logger.debug(`correct password is '${correct_password}'`);
 
 
         // Check the entered password against your predefined password

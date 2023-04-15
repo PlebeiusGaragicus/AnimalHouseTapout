@@ -9,7 +9,6 @@ export let db = null;
 
 export async function connectToMongoDB() {
     await client.connect();
-    // console.log("Connected to MongoDB");
     logger.info("Connected to MongoDB");
     db = client.db(config.DB_DATABASE_NAME);
 }
@@ -17,17 +16,14 @@ export async function connectToMongoDB() {
 
 export async function closeMongoDBConnection() {
     return new Promise(async (resolve, reject) => {
-        // console.log("closeMongoDBConnection()");
         logger.info("closeMongoDBConnection()");
         try {
             await client.close()
                 .then(() => {
-                    // console.log("Closed MongoDB connection");
                     logger.info("Closed MongoDB connection");
                     resolve();
                 });
         } catch (error) {
-            // console.error("Error closing MongoDB connection: ", error);
             logger.error("Error closing MongoDB connection: ", error);
             reject(error);
         }
@@ -42,7 +38,6 @@ export async function setValue(name, value) {
             $set: { value: value }
         }, { upsert: true });
     } catch (error) {
-        // console.error(error);
         logger.error(error);
     }
 }
@@ -59,7 +54,6 @@ export async function getValue(name) {
         return item.value;
 
     } catch (error) {
-        // console.error(error);
         logger.error(error);
     }
 }
@@ -77,7 +71,6 @@ export async function getUsersWithUnit() {
         return users;
 
     } catch (error) {
-        // console.error(error);
         logger.error(error);
     }
 }
@@ -95,17 +88,14 @@ export async function addUser(user_chat_id, unit) {
         const result = await collection.insertOne(newUser);
 
         if (result.acknowledged && result.insertedId) {
-            // console.log('New user added successfully');
             logger.info('New user added successfully');
             return newUser;
         } else {
-            // console.error('Failed to insert the new user');
             logger.error('Failed to insert the new user');
             return null;
         }
 
     } catch (error) {
-        // console.error(error);
         logger.error(error);
     }
 }
@@ -119,7 +109,6 @@ export async function userExists(telegram_chat_id) {
         return !!user;
 
     } catch (error) {
-        // console.error(error);
         logger.error(error);
         return false;
     }
@@ -138,7 +127,6 @@ export async function getUserUnit(telegram_chat_id) {
         return user.unit;
 
     } catch (error) {
-        // console.error(error);
         logger.error(error);
         return false;
     }
@@ -154,7 +142,6 @@ export async function updateUserUnit(user_chat_id, unit) {
         );
 
         if (result.modifiedCount !== 1) {
-            // console.error('Failed to update the user unit');
             logger.error('Failed to update the user unit');
             return false;
         }
@@ -162,7 +149,6 @@ export async function updateUserUnit(user_chat_id, unit) {
         return true;
 
     } catch (error) {
-        // console.error(error);
         logger.error(error);
         return false;
     }
@@ -180,7 +166,6 @@ export async function getAllUsers() {
         return users;
 
     } catch (error) {
-        // console.error(error);
         logger.error(error);
     }
 }
@@ -188,9 +173,9 @@ export async function getAllUsers() {
 
 
 
-//// FEEDBACK
 
 /*
+//// FEEDBACK - DATABASE.js
 Your database.js file looks functional and provides a good foundation for interacting with your MongoDB database. I'll provide some suggestions and best practices to help you improve it:
 
 [ ] Use environment variables for sensitive data: Instead of hardcoding the database URI in your code, consider using environment variables to store sensitive data like the MongoDB URI. This can help improve security and make it easier to change these values without modifying the code.
