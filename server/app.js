@@ -85,6 +85,8 @@ runIntterra();
 
 
 
+// [ ] don't use the database for login tokens / secret shit - instead use .env
+
 
 
 //// FEEDBACK:
