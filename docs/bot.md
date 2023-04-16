@@ -1,3 +1,5 @@
+# How the bot works
+
 # conversational flow
 
 /start
