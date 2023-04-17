@@ -1,12 +1,12 @@
 import express from 'express';
 import path from 'path';
 
-import config from './config.js';
-import logger from './logger.js';
-import { closeApp } from './helpers.js';
-import { db, connectToMongoDB } from "./database.js";
-import { initBot } from './telegramBot.js';
-import { runIntterra } from './intterra.js';
+import config from './server/config.js';
+import logger from './server/logger.js';
+import { closeApp } from './server/helpers.js';
+import { db, connectToMongoDB } from "./server/database.js";
+import { initBot } from './server/telegramBot.js';
+import { runIntterra } from './server/intterra.js';
 
 
 process.on("SIGINT", closeApp);
