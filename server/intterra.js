@@ -189,8 +189,8 @@ async function handleWebSocketFrameReceived({ requestId, timestamp, response }) 
     }
 
     // logger.info("WebSocket sitstat update received...");
-    // TODO... well shit... we don't need to log this to the file... but it's nice to see it working in real-time
-    process.stdout.write("...");
+    if (config.debug)
+        process.stdout.write("...");
 
     const units = [];
 
