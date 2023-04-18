@@ -245,6 +245,7 @@ async function processUnitUpdates(updates) {
 
     let incidents = null;
     if (tappedOutUnitsWithUsers.size > 0) {
+        await getCookies(page);
         incidents = await getIncidentData();
         await alertUsersForTappedOutUnits(tappedOutUnitsWithUsers, incidents);
     }
