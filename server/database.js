@@ -62,7 +62,7 @@ export async function getValue(name) {
 
 export async function getUsersWithUnit() {
     try {
-        const collection = db.collection(DB_USERS_COLLECTION_NAME);
+        const collection = db.collection(config.DB_USERS_COLLECTION_NAME);
         const users = await collection.find({ unit: { $exists: true, $ne: '' } }).toArray();
 
         if (!users || users.length === 0)
@@ -79,7 +79,7 @@ export async function getUsersWithUnit() {
 
 export async function addUser(user_chat_id, unit) {
     try {
-        const collection = db.collection(DB_USERS_COLLECTION_NAME);
+        const collection = db.collection(config.DB_USERS_COLLECTION_NAME);
         const newUser = {
             user_chat_id: user_chat_id,
             unit: unit,
