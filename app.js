@@ -8,6 +8,9 @@ import { db, connectToMongoDB } from "./server/database.js";
 import { initBot } from './server/telegramBot.js';
 import { runIntterra } from './server/intterra.js';
 
+logger.silly('Starting the app...')
+logger.info(`version: ${config.VERSION}`)
+
 
 process.on("SIGINT", closeApp);
 process.on("SIGTERM", closeApp);

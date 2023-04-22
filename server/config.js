@@ -4,6 +4,7 @@ dotenv.config();
 
 
 export default {
+    VERSION: '0.0.1',
     debug: process.env.DEBUG || false,
     port: process.env.PORT || 3000,
 
