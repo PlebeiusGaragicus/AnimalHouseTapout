@@ -251,7 +251,6 @@ async function processUnitUpdates(updates) {
         if (!incidents) {
             logger.error("Could not get incident data.  This app needs to be restarted.");
             process.exit(1);
-            return;
         }
         await alertUsersForTappedOutUnits(tappedOutUnitsWithUsers, incidents);
     }

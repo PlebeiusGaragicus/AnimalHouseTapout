@@ -83,6 +83,20 @@ initBot();
 
 runIntterra();
 
+// TODO - make a note here explaining why and what I found in the logs
+setInterval(exitAppToRestart, 1000 * 60 * 60 * 11) // restart the app every 11 hours
+
+
+
+function exitAppToRestart() {
+    logger.warn('Restarting the app...');
+    process.exit(0);
+}
+
+
+
+
+
 
 
 // [ ] don't use the database for login tokens / secret shit - instead use .env
