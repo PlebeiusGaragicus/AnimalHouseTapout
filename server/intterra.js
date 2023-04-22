@@ -59,7 +59,8 @@ async function getIncidentData(maxRetries = 3) {
                     return null;
                 });
 
-            logger.debug(incidents);
+            // still printing [object Object], ...
+            logger.debug({ incidents });
 
             // If the fetched data is not an array, set incidents to null so that the loop continues.
             if (!Array.isArray(incidents)) {
@@ -87,7 +88,7 @@ async function getIncidentData(maxRetries = 3) {
 
 async function getCookies(page) {
     // TODO: instead I could log if they change or not... instead of placing them in a log file (security risk?)
-    logger.debug("CURRENT COOKIES:");
+    logger.debug("OLD COOKIES:");
     logger.debug(`access_token: ${cookies.access_token}`);
     logger.debug(`refresh_token: ${cookies.refresh_token}`);
     logger.debug(`agstoken: ${cookies.agstoken}`);
@@ -103,7 +104,7 @@ async function getCookies(page) {
     const ags = page_cookies.find(cookie => cookie.name === 'agstoken');
     cookies.agstoken = ags.value;
 
-    logger.debug("CURRENT COOKIES:");
+    logger.debug("NEW COOKIES:");
     logger.debug(`access_token: ${cookies.access_token}`);
     logger.debug(`refresh_token: ${cookies.refresh_token}`);
     logger.debug(`agstoken: ${cookies.agstoken}`);
@@ -247,6 +248,11 @@ async function processUnitUpdates(updates) {
     if (tappedOutUnitsWithUsers.size > 0) {
         await getCookies(page);
         incidents = await getIncidentData();
+        if (!incidents) {
+            logger.error("Could not get incident data.  This app needs to be restarted.");
+            process.exit(1);
+            return;
+        }
         await alertUsersForTappedOutUnits(tappedOutUnitsWithUsers, incidents);
     }
 }
@@ -266,6 +272,11 @@ async function alertUsersForTappedOutUnits(tappedOutUnits, incidents) {
 
             // Find the incident in the incidents list by comparing incidentId
             const incident = incidents.find((i) => i.incidentId === incidentId);
+
+            if (!incident) {
+                logger.error(`Could not find incident ${incidentId} for unit ${unit}`);
+                continue;
+            }
 
             const call = {
                 id: incident.id,
