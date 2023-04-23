@@ -24,9 +24,9 @@ const consoleFormat = winston.format.printf(({ timestamp, level, message, stack 
 
 const localTimeFormat = winston.format((info, opts) => {
     if (opts.tz) {
-        info.timestamp = moment().tz(opts.tz).format('YYYY.MM.DD @ HH:mm:ss');
+        info.timestamp = moment().tz(opts.tz).format('YYYY.MM.DD HH:mm:ss');
     } else {
-        info.timestamp = moment().format('YYYY.MM.DD @ HH:mm:ss');
+        info.timestamp = moment().format('YYYY.MM.DD HH:mm:ss');
     }
     return info;
 });
@@ -38,6 +38,18 @@ const fileFormat = winston.format.combine(
     winston.format.errors({ stack: true }),
     winston.format.json()
 );
+
+
+const logglyTransport = new Loggly({
+    token: LOGGLY_CUSTOMER_TOKEN,
+    subdomain: 'AnimalHouseTap',
+    tags: ['Winston-NodeJS'],
+    json: true,
+});
+
+logglyTransport.on("error", (error) => {
+    console.error("Error while sending logs to Loggly:", error);
+});
 
 
 const logger = winston.createLogger({
@@ -58,12 +70,7 @@ const logger = winston.createLogger({
                 consoleFormat
             )
         }),
-        new Loggly({
-            token: LOGGLY_CUSTOMER_TOKEN,
-            subdomain: 'AnimalHouseTap',
-            tags: ['Winston-NodeJS'],
-            json: true,
-        }),
+        logglyTransport,
         new winston.transports.File({ filename: './logs/error.log', level: 'error', format: fileFormat }),
         new winston.transports.File({ filename: `./logs/errors-${Date.now()}.log`, level: 'error', format: fileFormat, options: { flags: 'w' } }),
 
