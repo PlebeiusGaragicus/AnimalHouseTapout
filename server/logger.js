@@ -10,15 +10,27 @@ const consoleFormat = winston.format.printf(({ timestamp, level, message, stack 
 
 const fileFormat = winston.format.combine(
     winston.format.uncolorize(),
-    winston.format.timestamp(),
+    // winston.format.timestamp(),
+    localTimeFormat(),
     winston.format.errors({ stack: true }),
     winston.format.json()
 );
 
+const localTimeFormat = winston.format((info, opts) => {
+    if (opts.tz) {
+        info.timestamp = moment().tz(opts.tz).format();
+    } else {
+        info.timestamp = moment().format();
+    }
+    return info;
+});
+
 const logger = winston.createLogger({
     level: 'debug',
     format: winston.format.combine(
-        winston.format.timestamp(),
+        // winston.format.timestamp(),
+        // localTimeFormat(),
+        localTimeFormat({ tz: 'America/Los_Angeles' }),
         winston.format.errors({ stack: true }),
         winston.format.splat(),
         consoleFormat
