@@ -59,7 +59,7 @@ const logger = winston.createLogger({
             )
         }),
         new Loggly({
-            token: 'LOGGLY_CUSTOMER_TOKEN',
+            token: LOGGLY_CUSTOMER_TOKEN,
             subdomain: 'AnimalHouseTap',
             tags: ['Winston-NodeJS'],
             json: true,
