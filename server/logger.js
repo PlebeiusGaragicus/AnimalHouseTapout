@@ -2,6 +2,7 @@
 
 import winston from 'winston';
 import moment from 'moment';
+import 'moment-timezone';
 
 
 const consoleFormat = winston.format.printf(({ timestamp, level, message, stack }) => {
