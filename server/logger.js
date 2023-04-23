@@ -3,7 +3,8 @@
 import winston from 'winston';
 import moment from 'moment';
 import 'moment-timezone';
-const { Loggly } = require('winston-loggly-bulk');
+// const { Loggly } = require('winston-loggly-bulk');
+import { Loggly } from 'winston-loggly-bulk';
 
 import dotenv from 'dotenv';
 
