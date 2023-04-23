@@ -9,13 +9,6 @@ const consoleFormat = winston.format.printf(({ timestamp, level, message, stack 
     return `[${timestamp}] ${level}: ${formattedMessage}`;
 });
 
-const fileFormat = winston.format.combine(
-    winston.format.uncolorize(),
-    // winston.format.timestamp(),
-    localTimeFormat(),
-    winston.format.errors({ stack: true }),
-    winston.format.json()
-);
 
 const localTimeFormat = winston.format((info, opts) => {
     if (opts.tz) {
@@ -25,6 +18,15 @@ const localTimeFormat = winston.format((info, opts) => {
     }
     return info;
 });
+
+const fileFormat = winston.format.combine(
+    winston.format.uncolorize(),
+    // winston.format.timestamp(),
+    localTimeFormat(),
+    winston.format.errors({ stack: true }),
+    winston.format.json()
+);
+
 
 const logger = winston.createLogger({
     level: 'debug',
