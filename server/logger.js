@@ -13,9 +13,9 @@ const consoleFormat = winston.format.printf(({ timestamp, level, message, stack 
 
 const localTimeFormat = winston.format((info, opts) => {
     if (opts.tz) {
-        info.timestamp = moment().tz(opts.tz).format();
+        info.timestamp = moment().tz(opts.tz).format('YYYY.MM.DD @ HH:mm:ss');
     } else {
-        info.timestamp = moment().format();
+        info.timestamp = moment().format('YYYY.MM.DD @ HH:mm:ss');
     }
     return info;
 });
