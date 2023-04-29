@@ -45,7 +45,7 @@ export async function handleUnitCommand(ctx) {
 }
 
 
-// TODO: add a failed password counter and ban users for 3 days
+
 export async function handleText(ctx) {
     if (usersAwaitingPassword.has(ctx.from.id)) {
         logger.info(`a password attempt from: ${ctx.from.username} - ${ctx.from.id} was ${ctx.message.text}`);

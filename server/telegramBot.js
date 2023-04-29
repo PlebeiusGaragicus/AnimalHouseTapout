@@ -67,16 +67,17 @@ export async function killBot() {
 export async function initBot() {
   logger.info("starting bot...");
 
-  const token = await getValue("telegram_bot_token");
+  // const token = await getValue("telegram_bot_token");
   // TODO: don't log this?
-  logger.debug(`bot token: ${token}`);
+  console.log(`bot token: ${config.TELEGRAM_BOT_TOKEN}`);
 
-  if (token == null) {
+  // if (token == null) {
+  if (!config.TELEGRAM_BOT_TOKEN) {
     logger.error("ERROR: Telegram bot token is not set.");
     return;
   }
 
-  bot = new Telegraf(token);
+  bot = new Telegraf(config.TELEGRAM_BOT_TOKEN);
 
   await clearPendingMessages();
 
@@ -110,14 +111,3 @@ https://www.google.com/maps/search/?api=1&query=${call.lat}%2C${call.lon}`;
 
   await bot.telegram.sendMessage(chatID, msg, { parse_mode: 'HTML' });
 }
-
-
-
-
-//// FEEDBACK
-
-/*
-[ ] Use constants for strings: Extract commonly used strings and user prompts into constants. This can help maintain consistency and make it easier to update these strings in the future.
-[ ] Error handling: Add error handling to your bot, especially when interacting with external services like the Telegram API. This can help you handle errors gracefully and provide more informative feedback to users.
-[ ] Use a state management library: Instead of using Set to manage user states, consider using a state management library like telegraf-state or a database to store user states. This can help you manage user states more efficiently and make your code more scalable.
-*/

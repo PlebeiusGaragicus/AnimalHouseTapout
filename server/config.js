@@ -6,13 +6,18 @@ dotenv.config();
 export default {
     VERSION: '0.0.1',
     debug: process.env.DEBUG || false,
-    port: process.env.PORT || 3000,
+    // port: process.env.PORT || 3000,
+
+    TELEGRAM_BOT_TOKEN: process.env.TELEGRAM_BOT_TOKEN || undefined,
 
     // DATABASE
     DB_COLLECTION_NAME: process.env.DB_COLLECTION_NAME || 'settings',
     DB_USERS_COLLECTION_NAME: process.env.DB_USERS_COLLECTION_NAME || 'users',
-    DB_DATABASE_NAME: process.env.DB_DATABASE_NAME || 'AnimalHouseTapout',
-    DB_URI: process.env.DB_URI || "mongodb://127.0.0.1:27017/AnimalHouseTapout",
+
+    // sensetive information from the database
+    DB_DATABASE_NAME: process.env.DB_DATABASE_NAME || undefined,
+    DB_URI: process.env.DB_URI || undefined,
+    REGISTRY_PASSWORD: process.env.REGISTRY_PASSWORD || undefined,
 
     // URLs
     URL_LOGIN: 'https://apps.intterragroup.com',

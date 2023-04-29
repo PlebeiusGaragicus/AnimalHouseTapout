@@ -120,18 +120,18 @@ export async function runIntterra() {
     const user = await getValue('intterra_username');
     const pass = await getValue('intterra_password');
     // TODO maybe don't do this?
-    logger.debug(`user: ${user} pass: ${pass}`);
-    if (!user || !pass) {
-        logger.error("Intterra username or password not set in database");
-        return;
-    }
+    // logger.debug(`user: ${user} pass: ${pass}`);
+    // if (!user || !pass) {
+    //     logger.error("Intterra username or password not set in database");
+    //     return;
+    // }
 
     const user_password = await getValue('registry_password');
-    if (!user_password) {
-        logger.error("Registry password not set in database");
-        logger.error("not running intterra...")
-        return;
-    }
+    // if (!user_password) {
+    //     logger.error("Registry password not set in database");
+    //     logger.error("not running intterra...")
+    //     return;
+    // }
 
     browser = await puppeteer.launch({ headless: config.debug ? false : true });
     // const page = await browser.newPage();
@@ -310,75 +310,3 @@ export async function killIntterra() {
 //     await runIntterra();
 // }
 
-
-
-/*
-
-//// FEEDBACK - INTTERRA.JS
-Here are some tips and best practice advice related to the intterra.js file:
-
-[ ] Validate user input:
-If you are using user-provided data (e.g., unit names), make sure to validate and sanitize it before using it in your code to avoid potential security risks.
-
-
-
-[ ] Error handling:
-Make sure to handle errors gracefully, especially in the functions that involve network requests, such as getIncidentData. Use try-catch blocks to catch errors and handle them accordingly.
-Add more error handling in handleWebSocketFrameReceived, as this function might encounter malformed JSON data that could cause the JSON.parse to throw an error.
-
-
-[ ] Code comments and documentation
-// here's the idea...
-// this function SOMEHOW listens in on the converstaion between the intterra website and the intterra server
-// it grabs the authorization tokens and listens to the websocket for updates
-// The websocket seems to send unit data every few seconds.
-// This data is just the data about the unit.. GPS location, current call, bearing, etc.  Not totally useful.
-// Once the unit I want has a call... I take the saved authorization tokens and make a call to the intterra server for the entire incident list.
-// Then I pair that with the unit data to get the call data I want... and sent it to the user.
-
-[ ] Optimize the processUnitUpdates function:
-Instead of calling getAllUsers() for each update, consider fetching the users once and passing them to the function as a parameter. This will reduce the number of database queries and improve performance.
-
-
-[ ] Use a more robust method for cleaning WebSocket messages:
-The current method for cleaning WebSocket messages in handleWebSocketFrameReceived involves a simple string replace. Consider using a more reliable method, such as parsing the message and re-encoding it without the unwanted data.
-
-
-[ ] Improve the WebSocket event handling:
-The WebSocket event listeners should handle reconnecting in case the connection is lost or closed. Consider adding logic to re-establish the connection and resume listening for updates.
-
-[ ] Avoid using global variables when possible:
-browser, page, and cookies are currently global variables. Consider refactoring the code to reduce their scope or pass them as parameters to the necessary functions.
-
-
-[ ] Modularization and separation of concerns:
-Consider breaking down the file into smaller, more focused modules. For example,
-separate the web scraping logic, incident data fetching, and alerting users into different files
-or modules. This makes the code easier to understand and maintain.
-I HAVE DECIDED NOT TO DO THIS... AT LEAST NOT YET
-
-
-
-
-
-
-
-[ ] USE CHATGPT to make my DOCUMENTATION
-
-The intterra.js file is a web scraping script that handles the interaction with the Intterra website. The purpose of this script is to listen for updates from the Intterra server, fetch incident data, and alert users when their assigned unit is tapped out on an incident.
-
-Here is a brief overview of each function in the file:
-
-getIncidentData(maxRetries = 3): This function fetches incident data from the Intterra server, handling retries if the fetch fails.
-getCookies(page): This function retrieves the access_token, refresh_token, and agstoken cookies from the Puppeteer page.
-runIntterra(): This function initializes the Puppeteer browser, logs into the Intterra website, and sets up listeners for WebSocket events.
-handleWebSocketFrameReceived({ requestId, timestamp, response }): This function processes incoming WebSocket frames, filtering out non-sitstat messages and calling processUnitUpdates(units) with the parsed sitstat data.
-processUnitUpdates(updates): This function updates the unit status map and checks if any registered units have been tapped out. If so, it fetches incident data and sends alerts to users.
-alertUsersForTappedOutUnits(tappedOutUnits, incidents): This function sends alerts to registered users when their assigned unit is tapped out on an incident.
-alertUser(chatID, call): This function sends an alert message to a user with the given chatID, containing details of the call.
-killIntterra(): This function closes the Puppeteer browser.
-export async function restartIntterra(): This commented-out function is intended to restart the Intterra web scraping process by calling killIntterra() and runIntterra().
-The script uses Puppeteer to launch a browser, log in to the Intterra website, and listen for WebSocket updates. When a unit's status changes, the script fetches the updated incident data and alerts the users who have registered for that unit.
-
-
-*/
