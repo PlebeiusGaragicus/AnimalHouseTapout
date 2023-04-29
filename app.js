@@ -15,6 +15,7 @@ logger.info(`version: ${config.VERSION}`)
 process.on("SIGINT", closeApp);
 process.on("SIGTERM", closeApp);
 process.on('uncaughtException', (error) => {
+    logger.error("LOGGING UNCAUGHT EXCEPTION:")
     logger.error(error);
     // closeApp();
 });

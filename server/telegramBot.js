@@ -2,7 +2,7 @@ import { Telegraf } from 'telegraf';
 
 import config from './config.js';
 import logger from './logger.js';
-import { getValue, getAllUsers } from './database.js';
+import { getAllUsers } from './database.js';
 import { handleStartCommand, handleUnitCommand, handleStopCommand, handleText } from './botCommands.js'
 
 

@@ -1,3 +1,4 @@
+import config from './config.js';
 import logger from './logger.js';
 import { closeMongoDBConnection } from "./database.js";
 import { killBot } from './telegramBot.js';
@@ -52,12 +53,12 @@ export async function checkENV() {
         return false;
     }
 
-    if (!config.INTTERRA_USR || !config.INTTERRA_PSK) {
+    if (!config.INTTERRA_USERNAME || !config.INTTERRA_PASSWORD) {
         logger.error("Intterra username or password not set in database");
         return false;
     } else
         // TODO maybe don't do this?
-        console.log(`user: ${user} pass: *****`)
+        console.log(`user: ${config.INTTERRA_USERNAME} pass: *****`)
 
 
 

@@ -9,7 +9,6 @@
 "That's wrong - try again.  I will ban you after ${} failed attempts."
 >asdf
 
-TODO we need to keep track of the number of failed attempts so that we can ban a user
 "Talk to the hand ✋🏻 you are banned!"
 
 

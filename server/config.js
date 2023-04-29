@@ -19,6 +19,9 @@ export default {
     DB_URI: process.env.DB_URI || undefined,
     REGISTRY_PASSWORD: process.env.REGISTRY_PASSWORD || undefined,
 
+    INTTERRA_USERNAME: process.env.INTTERRA_USERNAME || undefined,
+    INTTERRA_PASSWORD: process.env.INTTERRA_PASSWORD || undefined,
+
     // URLs
     URL_LOGIN: 'https://apps.intterragroup.com',
     URL_INCIDENT_ENDPOINT: 'https://dc.intterragroup.com/v1/sitstat/data/incidents',

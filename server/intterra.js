@@ -3,7 +3,7 @@ import fetch from 'node-fetch';
 
 import config from './config.js';
 import logger from './logger.js';
-import { getValue, getAllUsers } from './database.js';
+import { getAllUsers } from './database.js';
 import { tapoutUser } from './telegramBot.js';
 
 
@@ -117,8 +117,11 @@ export async function runIntterra() {
         return;
     }
 
-    const user = await getValue('intterra_username');
-    const pass = await getValue('intterra_password');
+    // const user = await getValue('intterra_username');
+    // const pass = await getValue('intterra_password');
+    const user = config.INTTERRA_USERNAME;
+    const pass = config.INTTERRA_PASSWORD;
+
     // TODO maybe don't do this?
     // logger.debug(`user: ${user} pass: ${pass}`);
     // if (!user || !pass) {
@@ -126,14 +129,17 @@ export async function runIntterra() {
     //     return;
     // }
 
-    const user_password = await getValue('registry_password');
+    // const user_password = await getValue('registry_password');
+    // const user_password = config.REGISTRY_PASSWORD;
+
     // if (!user_password) {
     //     logger.error("Registry password not set in database");
     //     logger.error("not running intterra...")
     //     return;
     // }
 
-    browser = await puppeteer.launch({ headless: config.debug ? false : true });
+    // browser = await puppeteer.launch({ headless: process.env.HEADLESS ? true : false });
+    browser = await puppeteer.launch({ headless: false });
     // const page = await browser.newPage();
     page = await browser.newPage();
 
@@ -158,6 +164,8 @@ export async function runIntterra() {
     const navigationPromise = page.waitForNavigation();
     await page.goto(config.URL_LOGIN);
     await navigationPromise;
+
+    // TODO: "Unable to verify username or password." add check for failed user/password
 
     await page.waitForSelector('[name="username"]');
     await page.type('[name="username"]', user);

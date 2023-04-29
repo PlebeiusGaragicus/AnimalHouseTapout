@@ -1,6 +1,6 @@
 import config from './config.js';
 import logger from './logger.js';
-import { userExists, addUser, getValue, getUserUnit, updateUserUnit, getAllUsers } from './database.js';
+import { userExists, addUser, getUserUnit, updateUserUnit, getAllUsers } from './database.js';
 
 
 const usersAwaitingPassword = new Set();
@@ -18,6 +18,7 @@ export async function handleStartCommand(ctx) {
 
         const unit = await getUserUnit(ctx.from.id);
         // TODO - huh?  Write this flow out more precicely.  What happens here?
+        // I'm unsure if the program will get to this state.
         if (unit === "") {
             ctx.reply("Your unit is not set!");
             ctx.reply("Use /unit to set your unit\n\nuse /stop when you get of shift");
@@ -50,7 +51,8 @@ export async function handleText(ctx) {
     if (usersAwaitingPassword.has(ctx.from.id)) {
         logger.info(`a password attempt from: ${ctx.from.username} - ${ctx.from.id} was ${ctx.message.text}`);
 
-        const correct_password = await getValue("registry_password")
+        // const correct_password = await getValue("registry_password")
+        const correct_password = config.REGISTRY_PASSWORD;
 
         // NOTE: I think best practice says that we don't log this...
         // logger.debug(`correct password is '${correct_password}'`);

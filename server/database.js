@@ -31,32 +31,32 @@ export async function closeMongoDBConnection() {
 }
 
 
-export async function setValue(name, value) {
-    try {
-        const collection = db.collection(config.DB_COLLECTION_NAME);
-        await collection.updateOne({ name: name }, {
-            $set: { value: value }
-        }, { upsert: true });
-    } catch (error) {
-        logger.error(error);
-    }
-}
+// export async function setValue(name, value) {
+//     try {
+//         const collection = db.collection(config.DB_COLLECTION_NAME);
+//         await collection.updateOne({ name: name }, {
+//             $set: { value: value }
+//         }, { upsert: true });
+//     } catch (error) {
+//         logger.error(error);
+//     }
+// }
 
 
-export async function getValue(name) {
-    try {
-        const collection = db.collection(config.DB_COLLECTION_NAME);
-        const item = await collection.findOne({ name: name });
+// export async function getValue(name) {
+//     try {
+//         const collection = db.collection(config.DB_COLLECTION_NAME);
+//         const item = await collection.findOne({ name: name });
 
-        if (!item)
-            return null;
+//         if (!item)
+//             return null;
 
-        return item.value;
+//         return item.value;
 
-    } catch (error) {
-        logger.error(error);
-    }
-}
+//     } catch (error) {
+//         logger.error(error);
+//     }
+// }
 
 
 
