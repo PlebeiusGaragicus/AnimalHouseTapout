@@ -198,8 +198,8 @@ async function handleWebSocketFrameReceived({ requestId, timestamp, response }) 
     }
 
     // logger.info("WebSocket sitstat update received...");
-    if (config.debug)
-        process.stdout.write("...");
+    // if (config.debug)
+        // process.stdout.write("...");
 
     const units = [];
 

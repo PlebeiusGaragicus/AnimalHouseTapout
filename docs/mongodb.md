@@ -69,3 +69,9 @@ db.collectionName.insertOne({field1: 'value1', field2: 'value2'})
 db.collectionName.updateOne({field1: 'value1'}, {$set: {field2: 'new_value2'}})
 db.collectionName.deleteOne({field1: 'value1'})
 ```
+
+## manually add users
+```sh
+# note, chat ID is a number, unit is a string
+db.users.insertOne({user_chat_id: NUMBER, unit: 'STRING'})
+```
