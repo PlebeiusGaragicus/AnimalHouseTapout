@@ -139,7 +139,7 @@ export async function runIntterra() {
     // }
 
     // browser = await puppeteer.launch({ headless: process.env.HEADLESS ? true : false });
-    browser = await puppeteer.launch({ headless: false });
+    browser = await puppeteer.launch({ headless: true });
     // const page = await browser.newPage();
     page = await browser.newPage();
 

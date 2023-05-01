@@ -1,6 +1,6 @@
 
 ```sh
-pm2 start ./server/app.js --name AnimalHouseTapout
+pm2 start ./app.js --name AnimalHouseTapout
 pm2 startup
 # copy and paste the command it gives you
 pm2 save

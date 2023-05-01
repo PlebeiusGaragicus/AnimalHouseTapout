@@ -2,7 +2,7 @@
 
 install packages with `npm install`
 
-You will also need to [Install MongoDB](./docs/mongodb.md)
+You will also need to [Install MongoDB](./mongodb.md)
 
 `.env` file should only be needed for development:
 
