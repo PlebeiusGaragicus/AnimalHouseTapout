@@ -60,7 +60,9 @@ async function getIncidentData(maxRetries = 3) {
                 });
 
             // still printing [object Object], ...
-            logger.debug(`${incidents}`);
+            // logger.debug(`${incidents}`);
+            // TODO: I'm not sure why objects aren't printing correctly with my logger... but this works:
+            console.log(incidents);
 
             // If the fetched data is not an array, set incidents to null so that the loop continues.
             if (!Array.isArray(incidents)) {
