@@ -49,3 +49,23 @@ sudo systemctl status mongod
 # enable the service to start on boot
 sudo systemctl enable mongod
 ```
+
+
+# using Mongosh
+
+```sh
+# connect to the correct database
+mongosh mongodb://localhost:27017/yourDatabaseName
+
+# show collections
+show collections
+
+# search all documents inside a collection:
+db.collectionName.find()
+db.users.find().pretty()
+
+# modify the database
+db.collectionName.insertOne({field1: 'value1', field2: 'value2'})
+db.collectionName.updateOne({field1: 'value1'}, {$set: {field2: 'new_value2'}})
+db.collectionName.deleteOne({field1: 'value1'})
+```
