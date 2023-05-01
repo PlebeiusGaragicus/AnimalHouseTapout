@@ -98,7 +98,7 @@ async function clearPendingMessages() {
 
 
 export async function tapoutUser(chatID, call) {
-  logger.info("TAPOUT TAPOUT TAPOUT TAPOUT TAPOUT TAPOUT!")
+  logger.info(`TAPOUT TAPOUT TAPOUT for ${chatID}`)
 
   const msg = `🚨 🚒💨
 

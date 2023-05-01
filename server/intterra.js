@@ -60,7 +60,7 @@ async function getIncidentData(maxRetries = 3) {
                 });
 
             // still printing [object Object], ...
-            logger.debug({ incidents });
+            logger.debug(`${incidents}`);
 
             // If the fetched data is not an array, set incidents to null so that the loop continues.
             if (!Array.isArray(incidents)) {
@@ -199,7 +199,7 @@ async function handleWebSocketFrameReceived({ requestId, timestamp, response }) 
 
     // logger.info("WebSocket sitstat update received...");
     // if (config.debug)
-        // process.stdout.write("...");
+    // process.stdout.write("...");
 
     const units = [];
 
