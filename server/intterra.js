@@ -60,7 +60,9 @@ async function getIncidentData(maxRetries = 3) {
                 });
 
             // still printing [object Object], ...
-            logger.debug({ incidents });
+            // logger.debug(`${incidents}`);
+            // TODO: I'm not sure why objects aren't printing correctly with my logger... but this works:
+            console.log(incidents);
 
             // If the fetched data is not an array, set incidents to null so that the loop continues.
             if (!Array.isArray(incidents)) {
@@ -139,7 +141,7 @@ export async function runIntterra() {
     // }
 
     // browser = await puppeteer.launch({ headless: process.env.HEADLESS ? true : false });
-    browser = await puppeteer.launch({ headless: false });
+    browser = await puppeteer.launch({ headless: true });
     // const page = await browser.newPage();
     page = await browser.newPage();
 
@@ -198,8 +200,8 @@ async function handleWebSocketFrameReceived({ requestId, timestamp, response }) 
     }
 
     // logger.info("WebSocket sitstat update received...");
-    if (config.debug)
-        process.stdout.write("...");
+    // if (config.debug)
+    // process.stdout.write("...");
 
     const units = [];
 
