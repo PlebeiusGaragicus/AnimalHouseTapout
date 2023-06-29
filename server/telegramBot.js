@@ -10,6 +10,7 @@ export let bot = null;
 
 
 export async function setupBot(bot) {
+  logger.info("setting up bot...");
   bot.command('start', handleStartCommand);
   bot.command('unit', handleUnitCommand);
   bot.command('stop', handleStopCommand);
