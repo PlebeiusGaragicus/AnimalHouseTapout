@@ -2,16 +2,16 @@ import winston from 'winston';
 import moment from 'moment';
 import 'moment-timezone';
 // const { Loggly } = require('winston-loggly-bulk');
-import { Loggly } from 'winston-loggly-bulk';
+// import { Loggly } from 'winston-loggly-bulk';
 
 import dotenv from 'dotenv';
 
 dotenv.config();
-const LOGGLY_CUSTOMER_TOKEN = process.env.LOGGLY_CUSTOMER_TOKEN;
-if (LOGGLY_CUSTOMER_TOKEN === undefined) {
-    console.log('LOGGLY_CUSTOMER_TOKEN is undefined.  Please set it in your .env file.');
-    process.exit(1);
-}
+// const LOGGLY_CUSTOMER_TOKEN = process.env.LOGGLY_CUSTOMER_TOKEN;
+// if (LOGGLY_CUSTOMER_TOKEN === undefined) {
+//     console.log('LOGGLY_CUSTOMER_TOKEN is undefined.  Please set it in your .env file.');
+//     // process.exit(1);
+// }
 
 
 const consoleFormat = winston.format.printf(({ timestamp, level, message, stack }) => {
@@ -38,16 +38,16 @@ const fileFormat = winston.format.combine(
 );
 
 
-const logglyTransport = new Loggly({
-    token: LOGGLY_CUSTOMER_TOKEN,
-    subdomain: 'AnimalHouseTap',
-    tags: ['Winston-NodeJS'],
-    json: true,
-});
+// const logglyTransport = new Loggly({
+//     token: LOGGLY_CUSTOMER_TOKEN,
+//     subdomain: 'AnimalHouseTap',
+//     tags: ['Winston-NodeJS'],
+//     json: true,
+// });
 
-logglyTransport.on("error", (error) => {
-    console.error("Error while sending logs to Loggly:", error);
-});
+// logglyTransport.on("error", (error) => {
+//     console.error("Error while sending logs to Loggly:", error);
+// });
 
 
 const logger = winston.createLogger({
@@ -62,13 +62,13 @@ const logger = winston.createLogger({
     ),
     defaultMeta: { service: 'your-service-name' },
     transports: [
-        new winston.transports.Console({
-            format: winston.format.combine(
-                winston.format.colorize(),
-                consoleFormat
-            )
-        }),
-        logglyTransport,
+        // new winston.transports.Console({
+        //     format: winston.format.combine(
+        //         winston.format.colorize(),
+        //         consoleFormat
+        //     )
+        // }),
+        // logglyTransport,
         new winston.transports.File({ filename: './logs/error.log', level: 'error', format: fileFormat }),
         new winston.transports.File({ filename: `./logs/errors-${Date.now()}.log`, level: 'error', format: fileFormat, options: { flags: 'w' } }),
 
