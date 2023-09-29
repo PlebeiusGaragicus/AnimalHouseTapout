@@ -103,9 +103,3 @@ setInterval(exitAppToRestart, 1000 * 60 * 60 * 11) // restart the app every 11 h
 //         res.status(500).send('Failed to update settings: ' + error);
 //     }
 // });
-
-
-
-
-
-

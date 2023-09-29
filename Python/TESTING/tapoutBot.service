@@ -1,0 +1,12 @@
+[Unit]
+Description=My Python Telegram Bot
+After=network.target
+
+[Service]
+ExecStart=/usr/bin/python3 /path/to/your/script.py
+Restart=on-failure
+User=your_username
+Group=your_group
+
+[Install]
+WantedBy=default.target
